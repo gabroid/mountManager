@@ -1,10 +1,11 @@
-mountManager - Verona, 5 Ottobre 2013 (Italy) - Gabriele Foresti -> https://github.com/gabroid
+[mountManager] - Gabriele Foresti -> https://github.com/gabroid                      Verona, 5 Ottobre 2013 (Italy)
+________
 ============
 
 A bash script that give to noobs the "ability" to mount\umount windows network shares.
 ======================================================================================
 
-==================================================== ITALIANO ==================================================================
+=============== ITALIANO ===============
 >Che cosa è mountManager ?
 Questo script monta automaticamente le shares del server, le quali vanno impostate nel file di configurazione [mountManager.config].
 E' possibile passare allo script la password o impostare in /etc/sudoers l'opzione NOPASSWD per l'utente interessato.
@@ -16,11 +17,11 @@ Per qualsiasi problema o segnalazione segnala pure via mail.
 - Volendo se avessi voglia di modificare il codice lo potresti rendere usabile sul tuo pc, devi cambiare i valori delle variabili.
 
 >ToDo:
-- Creare funzione per il file di configurazione per universalizzare.;
-- Interfaccia grafica, in QT? Zenity? altre? Studiare e scegliere.;
-- Cambiare tutti i commenti del codice da italiano a inglese, una opzione nel file di configurazione permetterà di cambiare la lingua dell'out dei comandi 
+- Creare funzione per il file di configurazione per universalizzare;
+- Interfaccia grafica, in QT? Zenity? altre? Studiare e scegliere;
+- Cambiare tutti i commenti del codice da italiano a inglese, una opzione nel file di configurazione permetterà di cambiare la lingua dell'out dei comandi; 
 
-==================================================== ENGLISH ======================================================================
+=============== ENGLISH ===============
 >What is mountManager ?
 This script automatically mounts the shares of the server, which should be set in the configuration file [mountManager.config].
 It's possible to pass to the script the user password, or set the user permissions in /etc/sudoers with NOPASSWD option.
@@ -34,4 +35,4 @@ For any problems or warnings jut tell me via e-mail.
 >ToDo:
 - make the config file function, to universalize the script;
 - make a GUI (graphical user interface) in QT ? Zenity? other else ? I have to study and choose...;
-- translate all script comments, for output transtlation, an option in config file will give the possibility to choose the right language.
+- translate all script comments, for output transtlation, an option in config file will give the possibility to choose the right language;
