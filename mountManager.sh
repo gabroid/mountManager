@@ -19,12 +19,12 @@
 ############################################################################################################################################################################
 ############################################################################################################################################################################
 
-password=$1 								# passata allo script da fuori
-SourceIP="192.168.1.100"					# ip dove risiede la share da montare
+password=$1 						# passata allo script da fuori
+SourceIP="192.168.1.100"				# ip dove risiede la share da montare
 DestPath="$HOME/NETWORKDRIVES"				# path di destinazione
 timestamp="`date +%d-%m-%Y_%T`"				# timestamp
 DestLogPath="$DestPath/LOG/monta"			# destinazione dei log, non terminare la stringa con /
-logfile="$DestLogPath/log_automonta.log"	# nome del file di log
+logfile="$DestLogPath/log_automonta.log"		# nome del file di log
 scriptname="$(basename "$0")"				# nome script
 fileLogSearch="log_automonta.log"			# nome del file di log generico da cercare
 
@@ -82,6 +82,7 @@ echo "------------------------------------")>>$logfile
 fi
 }
 
+#funzione di fine script
 function endScript(){
 #Fine script scrivo su log ed esco
 (
@@ -95,9 +96,15 @@ debug $?
 exit $1
 }
 
+#funzione per opzioni menu
 function menuOpzioni(){
 scelta=$1
 case $scelta in
+0)
+	printf "# Scelta opzione 0 -> Smonta tutto                   #\n"	
+	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Smontare tutto)">>$logfile
+	smonta
+;;
 1)
 	printf "# Scelta opzione 1 -> annulla script                 #\n"
 	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Script Annullato!)">>$logfile
@@ -128,23 +135,18 @@ case $scelta in
 	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKD)">>$logfile
 	arrayMount DISKD
 ;;
-7)
-	printf "# Scelta opzione 7 -> Smonta tutto                   #\n"	
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Smontare tutto)">>$logfile
-	smonta
-;;
 esac
 }
 
 function smonta(){
 # Definisco variabili:
-fileLogSearch="log_smonta_*log"				  # nome file da cercare per cancellare
-DestLogPath="$DestPath/LOG/smonta"			  # path di destinazione log
-logfile="$DestLogPath/log_smonta.log"          		  # genera nome file di log
+fileLogSearchSmonta="log_smonta_*log"				  # nome file da cercare per cancellare
+DestLogPathSmonta="$DestPath/LOG/smonta"			  # path di destinazione log
+logfileSmonta="$DestLogPathSmonta/log_smonta.log"          		  # genera nome file di log
 
 #Verifico esistenza cartelle ed eventualmente le creo
-checkDirs $DestPath		#cartella di destinazione
-checkDirs $DestLogPath		#Cartella destinazione logs
+checkDirs $DestPath			#cartella di destinazione
+checkDirs $DestLogPathSmonta		#Cartella destinazione logs
 
 #Smonto tutto
 (
@@ -157,17 +159,17 @@ echo "##########################################################################
 echo "###  $timestamp - $scriptname log file"
 echo "###  Lo script smonta tutte le partizioni"
 echo "###  Eseguito da $USER - Home:$HOME | in `pwd`"
-echo "###  file di log $fileLogSearch - in $DestLogPath"
+echo "###  file di log $fileLogSearchSmonta - in $DestLogPathSmonta"
 echo "############################################################################"
-echo "############################################################################") >>$logfile
-echo "`date +%d-%m-%Y_%T`: smonto tutto">>$logfile 
-((sudo umount -a -t cifs>>$logfile)>>$logfile || (echo "$timestamp: errore smontaggio">>$logfile && exit 99))2>>$logfile
+echo "############################################################################") >>$logfileSmonta
+echo "`date +%d-%m-%Y_%T`: smonto tutto">>$logfileSmonta 
+((sudo umount -a -t cifs>>$logfileSmonta)>>$logfileSmonta || (echo "$timestamp: errore smontaggio">>$logfileSmonta && exit 99))2>>$logfileSmonta
 debug $?
-echo "`date +%d-%m-%Y_%T`: script finito">>$logfile
+echo "`date +%d-%m-%Y_%T`: script finito">>$logfileSmonta
 (echo ""
 echo "RC script ->$?<-"
 echo "      __________END__________"
-echo "")>>$logfile
+echo "")>>$logfileSmonta
 debug $?
 exit $?
 }
@@ -176,18 +178,18 @@ function showMenu(){
 #verifico che siano inseriti i parametri
 	printf "#######################################\n"
 	printf "# Scegli una Opzione                  #\n"
+	printf "# 0 -> Smonta tutto!                  #\n"
 	printf "# 1 -> annulla script                 #\n"
 	printf "# 2 -> Monta DISKA DISKB DISKC DISKD  #\n"
 	printf "# 3 -> Monta solo DISKA               #\n"
 	printf "# 4 -> Monta solo DISKB               #\n"
 	printf "# 5 -> Monta solo DISKC               #\n"
 	printf "# 6 -> Monta solo DISKD               #\n"
-	printf "# 7 -> Smonta tutto!                  #\n"
 	printf "#######################################\n"
 	printf "#######################################\n"
 	echo   "# inserisci un numero: ################"
 	read option
-if [ $option -lt 9 ] && [ $option -gt 0 ]
+if [ $option -lt "7" ] && [ $option -gt "-1" ]
 	then
 		menuOpzioni $option
 	else
