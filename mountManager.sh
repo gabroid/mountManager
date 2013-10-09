@@ -19,14 +19,7 @@
 ############################################################################################################################################################################
 ############################################################################################################################################################################
 
-password=$1 						# passata allo script da fuori
-SourceIP="192.168.1.100"				# ip dove risiede la share da montare
-DestPath="$HOME/NETWORKDRIVES"				# path di destinazione
-timestamp="`date +%d-%m-%Y_%T`"				# timestamp
-DestLogPath="$DestPath/LOG/monta"			# destinazione dei log, non terminare la stringa con /
-logfile="$DestLogPath/log_automonta.log"		# nome del file di log
-scriptname="$(basename "$0")"				# nome script
-fileLogSearch="log_automonta.log"			# nome del file di log generico da cercare
+. mountManager.config
 
 ############################################################################################################################################################################
 ############################################################################################################################################################################
@@ -139,11 +132,6 @@ esac
 }
 
 function smonta(){
-# Definisco variabili:
-fileLogSearchSmonta="log_smonta_*log"				  # nome file da cercare per cancellare
-DestLogPathSmonta="$DestPath/LOG/smonta"			  # path di destinazione log
-logfileSmonta="$DestLogPathSmonta/log_smonta.log"          		  # genera nome file di log
-
 #Verifico esistenza cartelle ed eventualmente le creo
 checkDirs $DestPath			#cartella di destinazione
 checkDirs $DestLogPathSmonta		#Cartella destinazione logs
