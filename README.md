@@ -6,6 +6,10 @@ A bash script that give to noobs the "ability" to mount\umount windows network s
 ======================================================================================
 
 =============== ITALIANO ===============
+>Requisiti:
+cifs-utils
+smbclient
+
 >Che cosa è mountManager ?
 Questo script monta automaticamente le shares del server, le quali vanno impostate nel file di configurazione [mountManager.config].
 E' possibile passare allo script la password o impostare in /etc/sudoers l'opzione NOPASSWD per l'utente interessato.
@@ -22,6 +26,10 @@ Per qualsiasi problema o segnalazione segnala pure via mail.
 - Cambiare tutti i commenti del codice da italiano a inglese, una opzione nel file di configurazione permetterà di cambiare la lingua dell'out dei comandi; 
 
 =============== ENGLISH ===============
+>Requires:
+cifs-utils
+smbclient
+
 >What is mountManager ?
 This script automatically mounts the shares of the server, which should be set in the configuration file [mountManager.config].
 It's possible to pass to the script the user password, or set the user permissions in /etc/sudoers with NOPASSWD option.
