@@ -24,6 +24,9 @@ Per qualsiasi problema o segnalazione segnala pure via mail.
 - Creare funzione per il file di configurazione per universalizzare;
 - Interfaccia grafica, in QT? Zenity? altre? Studiare e scegliere;
 - Cambiare tutti i commenti del codice da italiano a inglese, una opzione nel file di configurazione permetterà di cambiare la lingua dell'out dei comandi; 
+- aggiungere funzioni: check pacchetti, check dir esistente, modificare il file di config per creare il menu dinamicamente
+- fare funzione per change permessi mount senza password
+- brainstorming su funzionalità
 
 =============== ENGLISH ===============
 >Requires:
