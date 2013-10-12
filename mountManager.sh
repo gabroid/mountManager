@@ -12,7 +12,7 @@
 #--- interessanti, comprese informazioni per il debug. --------------------------------------------------------------------------------------------------------------------
 #--- Per qualsiasi problema o segnalazione segnala pure via mail. ---------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+#2>&1 |tee -a $logfile
 ############################################################################################################################################################################
 ############################################################################################################################################################################
 #Definizione variabili: ####################################################################################################################################################
@@ -26,6 +26,21 @@
 #Definizione Funzioni: #####################################################################################################################################################
 ############################################################################################################################################################################
 ############################################################################################################################################################################
+
+#. functions.mm
+#!/bin/bash
+#funzione verifica pacchetti:
+function pkgeExistence(){
+		checkDirs $DestPath
+		checkDirs $DestLogPath
+		checkDirs $DestPath/$SourceSubDir
+		checkDirs $DestLogPathSmonta
+if dpkg -l $1 >/dev/null; then
+    echo "$timestamp : [$1] non verrà installato, è già presente nel sistema"
+else
+    echo "`$timestamp`:  $1 -> does not exist"
+fi
+}
 
 # Funzione di mount automatica, passato allo script il nome della cartella da montare, viene creata una cartella identica in locale
 # con lo stesso nome e nella destination definita nel file di configurazione.
@@ -49,9 +64,7 @@ function monta() {
 		checkDirs $DestPath
 		checkDirs $DestLogPath
 		checkDirs $DestPath/$SourceSubDir
-		echo "`date +%d-%m-%Y_%T`: Monto disco $SourceSubDir">>$logfile 
-		(sudo mount -t cifs //$SourceIP/$SourceSubDir $DestPath/$SourceSubDir/ -o user=$USER,pass=$password,rw,hard,nosetuids,noperm,sec=ntlm && 
-		(echo "`date +%d-%m-%Y_%T`: $SourceSubDir montato su $DestPath/$SourceSubDir corretamente" || echo "`date +%d-%m-%Y_%T`: Errore montaggio $SourceSubDir">>$logfile))2>>$logfile
+((echo "`$timestamp`: Monto disco $SourceSubDir";sudo mount -t cifs //$SourceIP/$SourceSubDir $DestPath/$SourceSubDir/ -o user=$USER,pass=$password,rw,hard,nosetuids,noperm,sec=ntlm) && (echo "`$timestamp`: $SourceSubDir montato su $DestPath/$SourceSubDir corretamente" || echo "`$timestamp`: Errore montaggio $SourceSubDir"))2>&1 |tee -a $logfile
 debug $?
 }
 
@@ -65,13 +78,13 @@ echo "------ Check vars ------------------"
 echo "SourceIP.......: $SourceIP"
 echo "SourceSubDir...: $SourceSubDir"
 echo "DestPath.......: $DestPath"
-echo "timestamp......: $timestamp"
+echo "timestamp......: $$timestamp"
 echo "DestLogPath....: $DestLogPath"
 echo "logfile........: $logfile"
 echo "scriptname.....: $scriptname"
-echo "fileLogSearch..: $fileLogSearch"
+echo "fileLogName....: $fileLogName"
 echo "rc.............: $rc"
-echo "------------------------------------")>>$logfile
+echo "------------------------------------")2>&1 |tee -a $logfile
 fi
 }
 
@@ -79,11 +92,11 @@ fi
 function endScript(){
 #Fine script scrivo su log ed esco
 (
-echo "`date +%d-%m-%Y_%T`: Script Terminato"
+echo "`$timestamp`: Script Terminato"
 echo ""
 echo "RC script ->$1<-"
 echo "      __________END__________"
-echo "")>>$logfile
+echo "")2>&1 |tee -a $logfile
 debug $?
 
 exit $1
@@ -94,38 +107,38 @@ function menuOpzioni(){
 scelta=$1
 case $scelta in
 0)
-	printf "# Scelta opzione 0 -> Smonta tutto                   #\n"	
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Smontare tutto)">>$logfile
+	printf "# Scelta opzione $option -> Smonta tutto                   #\n"	
+	echo "`$timestamp`: Scelta opzione $option (Smontare tutto)">>$logfile
 	smonta
 ;;
 1)
-	printf "# Scelta opzione 1 -> annulla script                 #\n"
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Script Annullato!)">>$logfile
+	printf "# Scelta opzione $option -> annulla script                 #\n"
+	echo "`$timestamp`: Scelta opzione $option (Script Annullato!)">>$logfile
 	endScript 1
 ;;
 2)
-	printf "# Scelta opzione 2 -> Monta DISKA DISKB DISKC DISKD  #\n"
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKA DISKB DISKC DISKD)">>$logfile
+	printf "# Scelta opzione $option -> Monta DISKA DISKB DISKC DISKD  #\n"
+	echo "`$timestamp`: Scelta opzione $option (Montare DISKA DISKB DISKC DISKD)">>$logfile
 	arrayMount DISKA DISKB DISKC DISKD
 ;;
 3)
-	printf "# Scelta opzione 3 -> Monta solo DISKA               #\n"
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKA)">>$logfile
+	printf "# Scelta opzione $option -> Monta solo DISKA               #\n"
+	echo "`$timestamp`: Scelta opzione $option (Montare DISKA)">>$logfile
 	arrayMount DISKA
 ;;
 4)
-	printf "# Scelta opzione 4 -> Monta solo DISKB               #\n"
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKB)">>$logfile
+	printf "# Scelta opzione $option -> Monta solo DISKB               #\n"
+	echo "`$timestamp`: Scelta opzione $option (Montare DISKB)">>$logfile
 	arrayMount DISKB
 ;;
 5)
-	printf "# Scelta opzione 5 -> Monta solo DISKC               #\n"	
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKC)">>$logfile
+	printf "# Scelta opzione $option -> Monta solo DISKC               #\n"	
+	echo "`$timestamp`: Scelta opzione $option (Montare DISKC)">>$logfile
 	arrayMount DISKC
 ;;
 6)
-	printf "# Scelta opzione 6 -> Monta solo DISKD               #\n"	
-	echo "`date +%d-%m-%Y_%T`: Scelta opzione $option (Montare DISKD)">>$logfile
+	printf "# Scelta opzione $option -> Monta solo DISKD               #\n"	
+	echo "`$timestamp`: Scelta opzione $option (Montare DISKD)">>$logfile
 	arrayMount DISKD
 ;;
 esac
@@ -134,30 +147,28 @@ esac
 function smonta(){
 #Verifico esistenza cartelle ed eventualmente le creo
 checkDirs $DestPath			#cartella di destinazione
-checkDirs $DestLogPathSmonta		#Cartella destinazione logs
+checkDirs $DestLogPath		#Cartella destinazione logs
 
 #Smonto tutto
-(
-echo ""
-echo ""
-echo ""
-echo ""
-echo "############################################################################"
-echo "############################################################################"
-echo "###  $timestamp - $scriptname log file"
-echo "###  Lo script smonta tutte le partizioni"
-echo "###  Eseguito da $USER - Home:$HOME | in `pwd`"
-echo "###  file di log $fileLogSearchSmonta - in $DestLogPathSmonta"
-echo "############################################################################"
-echo "############################################################################") >>$logfileSmonta
-echo "`date +%d-%m-%Y_%T`: smonto tutto">>$logfileSmonta 
-((sudo umount -a -t cifs>>$logfileSmonta)>>$logfileSmonta || (echo "$timestamp: errore smontaggio">>$logfileSmonta && exit 99))2>>$logfileSmonta
+#(echo ""
+#echo ""
+#echo ""
+#echo ""
+#echo "############################################################################"
+#echo "############################################################################"
+#echo "###  $$timestamp - $scriptname log file"
+#echo "###  Lo script smonta tutte le partizioni"
+#echo "###  Eseguito da $USER - Home:$HOME | in `pwd`"
+#echo "###  file di log $fileLogName - in $DestLogPath"
+#echo "############################################################################"
+#echo "############################################################################") >>$logfile
+((sudo umount -a -t cifs && echo "`$timestamp`: smonto tutto") || (echo "$$timestamp: errore smontaggio" && exit 99))2>&1 |tee -a $logfile
 debug $?
-echo "`date +%d-%m-%Y_%T`: script finito">>$logfileSmonta
+echo "`$timestamp`: script finito"2>&1 |tee -a $logfile
 (echo ""
 echo "RC script ->$?<-"
 echo "      __________END__________"
-echo "")>>$logfileSmonta
+echo "")2>&1 |tee -a $logfile
 debug $?
 exit $?
 }
@@ -182,10 +193,10 @@ if [ $option -lt "7" ] && [ $option -gt "-1" ]
 		menuOpzioni $option
 	else
 		printf "########## /!\ ATTENZIONE /!\ #########\n"
-		printf "# Inserito valore non corretto        #\n"
+		printf "# Inserito valore non corretto $option       \n"
 		printf "# ricarico Menù                       #\n"	
 		printf "#######################################\n"
-		echo "`date +%d-%m-%Y_%T`: inserito valore non corretto ->$option<-" >>$logfile
+		echo "`$timestamp`: inserito valore non corretto ->$option<-">>$logfile
 		showMenu
 fi
 
@@ -196,9 +207,10 @@ function checkDirs(){
 directory=$1
 if [ ! -d "$directory" ]; then
 mkdir -p $directory
-echo "`date +%d-%m-%Y_%T`: Creata cartella: $directory"
+(echo "`$timestamp`: Creata cartella: $directory")2>&1 |tee -a $logfile
 fi
 }
+
 ############################################################################################################################################################################
 ############################################################################################################################################################################
 # Script : #################################################################################################################################################################
@@ -217,14 +229,15 @@ echo ""
 echo ""
 echo "############################################################################"
 echo "############################################################################"
-echo "###  $timestamp - $scriptname log file"
+echo "###  $$timestamp - $scriptname log file"
 echo "###  Lo script monta tutte le partizioni indicate"
 echo "###  Eseguito da $USER - Home:$HOME | in `pwd`"
-echo "###  file di log $fileLogSearch - in $DestLogPath"
+echo "###  file di log $fileLogName - in $DestLogPath"
 echo "############################################################################"
-echo "############################################################################") >>$logfile
+echo "############################################################################")>>$logfile
 #Logging session:
-(printf "\n\n\n" && echo "`date +%d-%m-%Y_%T`: Creo File - $fileLogSearch - in $DestLogPath" && echo "`date +%d-%m-%Y_%T`: inizio script">>$logfile || (exit 99 && echo "`date +%d-%m-%Y_%T`: impossibile creare file di log!!">>$logfile))2>>$logfile
+printf "\n\n\n" 
+((echo "`$timestamp`: Creo File - $fileLogName - in $DestLogPath" && echo "`$timestamp`: inizio script") || (exit 99 && echo "`$timestamp`: impossibile creare file di log!!"))2>&1 |tee -a $logfile
 
 showMenu
 
