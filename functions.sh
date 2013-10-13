@@ -3,7 +3,7 @@
 function pkgeExistence(){
 if dpkg-query -Wf'${db:Status-abbrev}' $1 | grep -q '^i'; 
 	then
-	    (echo "`$timestamp` : [$1] non verrà installato, è già presente nel sistema")2>&1 |tee -a $logfile
+	    (echo "`$timestamp`: [$1] non verrà installato, è già presente nel sistema")2>&1 |tee -a $logfile
 	else
 		(echo "`$timestamp`:  $1 -> non è presente, perchè questo script funzioni è necessario installarlo, vuoi farlo Y(yes) N(No)?")2>&1 |tee -a $logfile
 		read choose
@@ -58,16 +58,22 @@ rc=$1
 # -ne significa not equal
 if [ "$rc" -ne "0" ] ; then 
 (echo "------------------------------------"
-echo "------ Check vars ------------------"
-echo "SourceIP.......: $SourceIP"
-echo "SourceSubDir...: $SourceSubDir"
-echo "DestPath.......: $DestPath"
-echo "timestamp......: $$timestamp"
-echo "DestLogPath....: $DestLogPath"
-echo "logfile........: $logfile"
-echo "scriptname.....: $scriptname"
-echo "fileLogName....: $fileLogName"
-echo "rc.............: $rc"
+echo "------ Check vars -------------------"
+echo "SourceIP..........: $SourceIP"
+echo "SourceSubDir......: $SourceSubDir"
+echo "DestPath..........: $DestPath"
+echo "timestamp.........: `$timestamp`"
+echo "DestLogPath.......: $DestLogPath"
+echo "logfile...........: $logfile"
+echo "scriptname........: $scriptname"
+echo "fileLogName.......: $fileLogName"
+echo '${what[*]}........: '${what[*]}''
+echo '${what[$x]}.......: '${what[$x]}''
+#echo '${listMount[$x]}..: '${listMount[$x]}''
+echo "x.................: $x"
+echo "conta.............: $conta"
+echo "optionNumbers.....:"$optionNumbers
+echo "rc................: $rc"
 echo "------------------------------------")2>&1 |tee -a $logfile
 fi
 }
@@ -86,66 +92,11 @@ debug $?
 exit $1
 }
 
-#funzione per opzioni menu
-function menuOpzioni(){
-scelta=$1
-case $scelta in
-0)
-	printf "# Scelta opzione $option -> Smonta tutto                   #\n"	
-	echo "`$timestamp`: Scelta opzione $option (Smontare tutto)">>$logfile
-	smonta
-;;
-1)
-	printf "# Scelta opzione $option -> annulla script                 #\n"
-	echo "`$timestamp`: Scelta opzione $option (Script Annullato!)">>$logfile
-	endScript 1
-;;
-2)
-	printf "# Scelta opzione $option -> Monta DISKA DISKB DISKC DISKD  #\n"
-	echo "`$timestamp`: Scelta opzione $option (Montare DISKA DISKB DISKC DISKD)">>$logfile
-	arrayMount DISKA DISKB DISKC DISKD
-;;
-3)
-	printf "# Scelta opzione $option -> Monta solo DISKA               #\n"
-	echo "`$timestamp`: Scelta opzione $option (Montare DISKA)">>$logfile
-	arrayMount DISKA
-;;
-4)
-	printf "# Scelta opzione $option -> Monta solo DISKB               #\n"
-	echo "`$timestamp`: Scelta opzione $option (Montare DISKB)">>$logfile
-	arrayMount DISKB
-;;
-5)
-	printf "# Scelta opzione $option -> Monta solo DISKC               #\n"	
-	echo "`$timestamp`: Scelta opzione $option (Montare DISKC)">>$logfile
-	arrayMount DISKC
-;;
-6)
-	printf "# Scelta opzione $option -> Monta solo DISKD               #\n"	
-	echo "`$timestamp`: Scelta opzione $option (Montare DISKD)">>$logfile
-	arrayMount DISKD
-;;
-esac
-}
-
+#funzione di smontaggio:
 function smonta(){
 #Verifico esistenza cartelle ed eventualmente le creo
 checkDirs $DestPath			#cartella di destinazione
 checkDirs $DestLogPath		#Cartella destinazione logs
-
-#Smonto tutto
-#(echo ""
-#echo ""
-#echo ""
-#echo ""
-#echo "############################################################################"
-#echo "############################################################################"
-#echo "###  $$timestamp - $scriptname log file"
-#echo "###  Lo script smonta tutte le partizioni"
-#echo "###  Eseguito da $USER - Home:$HOME | in `pwd`"
-#echo "###  file di log $fileLogName - in $DestLogPath"
-#echo "############################################################################"
-#echo "############################################################################") >>$logfile
 ((sudo umount -a -t cifs && echo "`$timestamp`: smonto tutto") || (echo "$$timestamp: errore smontaggio" && exit 99))2>&1 |tee -a $logfile
 debug $?
 echo "`$timestamp`: script finito"2>&1 |tee -a $logfile
@@ -157,7 +108,79 @@ debug $?
 exit $?
 }
 
+#Crea dinamicamente il menu
 function showMenu(){
+conta=2
+
+printf "#######################################\n"
+printf "# Scegli una Opzione                  #\n"
+printf "# 0 -> annulla script                 #\n"
+printf "# 1 -> Smonta tutto!                  #\n"
+
+# definisco array e disegno menu dinamicamente
+what=($listMount)
+printf "# $conta -> monto: ${what[*]}  \n"
+optionNumbers=$((${#what[*]}+$conta))						# quante opzioni per il menu comprese 0 annulla script e 1 smonta tutto
+conta=$(($conta+1))
+for wtf in ${what[*]}
+	do 
+		printf "# $conta -> monto: $wtf  \n"
+		conta=$(($conta+1))	
+	done
+conta=2
+echo "# inserisci un numero: ################"
+read option
+echo "# Hai scelto $option                  #"
+#echo "OPTIONUMBERS è $optionNumbers"
+if [ $option -le $optionNumbers -a $option -ge 0 ];
+	then
+		echo "case $option in" >> $filemenu
+		
+		(echo "0)")>>$filemenu
+		(echo 'echo "# Scelta opzione '$option' -> annulla script                 "')>>$filemenu
+		(echo 'echo "'`$timestamp`': Scelta opzione '$option' Script Annullato">>'$logfile'')>>$filemenu
+		(echo 'endScript 1')>>$filemenu
+		(echo ";;")>>$filemenu
+		(echo "1)")>>$filemenu
+		(echo 'echo "# Scelta opzione '$option' -> smonta tutto                   "')>>$filemenu
+		(echo 'echo "'`$timestamp`': Scelta opzione '$option' Smontare tutto">>'$logfile'')>>$filemenu
+		(echo 'smonta')>>$filemenu
+		(echo ";;")>>$filemenu
+		(echo "$conta)")>>$filemenu
+		(echo 'echo "# Scelta opzione '$option' -> Monta '${what[$*]}'"')>>$filemenu
+		(echo 'echo "'`$timestamp`': Scelta opzione '$conta' (Montare '${what[$*]}')">>'$logfile'')>>$filemenu
+		(echo 'arrayMount '${what[*]}'')>>$filemenu
+		(echo ";;")>>$filemenu
+		conta=$(($conta+1))
+		x=0
+		#debug 289
+			while [ $conta -le $optionNumbers ];
+					do 
+						(echo "$conta)")>>$filemenu
+						(echo 'echo "# Scelta opzione '$option' -> Monta '${what[$x]}'"')>>$filemenu
+						(echo 'echo "'`$timestamp`': Scelta opzione '$conta' (Montare '${what[$x]}')">>'$logfile'')>>$filemenu
+						(echo 'arrayMount '${what[$x]}'')>>$filemenu
+						(echo ";;")>>$filemenu
+						conta=$(($conta+1)) 
+						x=$(($x+1))
+						#debug 299
+					done
+		(echo "esac")>>$filemenu
+		. $filemenu
+		#cancello il file menu temporaneo
+		(rm -r -f $filemenu)2>&1 |tee -a $logfile 
+	else
+		printf "########## /!\ ATTENZIONE /!\ #########\n"
+		printf "# Inserito valore non corretto $option       \n"
+		printf "# ricarico Menù                       #\n"	
+		printf "#######################################\n"
+		echo "`$timestamp`: inserito valore non corretto ->$option<-"
+	exit 11
+fi
+}
+
+
+function showMenu_OLD(){
 #verifico che siano inseriti i parametri
 	printf "#######################################\n"
 	printf "# Scegli una Opzione                  #\n"
@@ -174,7 +197,44 @@ function showMenu(){
 	read option
 if [ $option -lt "7" ] && [ $option -gt "-1" ]
 	then
-		menuOpzioni $option
+
+case $option in
+	0)
+		printf "# Scelta opzione $option -> Smonta tutto                   #\n"	
+		echo "`$timestamp`: Scelta opzione $option (Smontare tutto)">>$logfile
+		smonta
+	;;
+	1)
+		printf "# Scelta opzione $option -> annulla script                 #\n"
+		echo "`$timestamp`: Scelta opzione $option (Script Annullato!)">>$logfile
+		endScript 1
+	;;
+	2)
+		printf "# Scelta opzione $option -> Monta DISKA DISKB DISKC DISKD  #\n"
+		echo "`$timestamp`: Scelta opzione $option (Montare DISKA DISKB DISKC DISKD)">>$logfile
+		arrayMount DISKA DISKB DISKC DISKD
+	;;
+	3)
+		printf "# Scelta opzione $option -> Monta solo DISKA               #\n"
+		echo "`$timestamp`: Scelta opzione $option (Montare DISKA)">>$logfile
+		arrayMount DISKA
+	;;
+	4)
+		printf "# Scelta opzione $option -> Monta solo DISKB               #\n"
+		echo "`$timestamp`: Scelta opzione $option (Montare DISKB)">>$logfile
+		arrayMount DISKB
+	;;
+	5)
+		printf "# Scelta opzione $option -> Monta solo DISKC               #\n"	
+		echo "`$timestamp`: Scelta opzione $option (Montare DISKC)">>$logfile
+		arrayMount DISKC
+	;;
+	6)
+		printf "# Scelta opzione $option -> Monta solo DISKD               #\n"	
+		echo "`$timestamp`: Scelta opzione $option (Montare DISKD)">>$logfile
+		arrayMount DISKD
+	;;
+esac
 	else
 		printf "########## /!\ ATTENZIONE /!\ #########\n"
 		printf "# Inserito valore non corretto $option       \n"
@@ -193,4 +253,16 @@ if [ ! -d "$directory" ]; then
 mkdir -p $directory
 (echo "`$timestamp`: Creata cartella: $directory")2>&1 |tee -a $logfile
 fi
+}
+
+# Crea menu dinamicamente in base a quanto si vuole montare
+function dinMenu(){
+what=($*)
+printf "# $conta -> monto: ${what[*]}  \n"
+conta=$(($conta+1))
+for wtf in ${what[*]}
+	do 
+		printf "# $conta -> monto: $wtf  \n"
+		conta=$(($conta+1))	
+	done
 }
