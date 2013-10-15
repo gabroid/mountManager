@@ -110,6 +110,9 @@ exit $?
 
 #Crea dinamicamente il menu
 function showMenu(){
+#cancello il file menu temporaneo precedentemente creato
+(rm $filemenu 2>&1 |tee -a $logfile && echo "`$timestamp`: cancellato file temporaneo $filemenu" 2>&1 |tee -a $logfile) || echo "`$timestamp`: errore cancellazione file temporaneo $filemenu"2>&1 |tee -a $logfile
+
 conta=2
 
 printf "#######################################\n"
@@ -167,8 +170,6 @@ if [ $option -le $optionNumbers -a $option -ge 0 ];
 					done
 		(echo "esac")>>$filemenu
 		. $filemenu
-		#cancello il file menu temporaneo
-		(rm -r -f $filemenu)2>&1 |tee -a $logfile 
 	else
 		printf "########## /!\ ATTENZIONE /!\ #########\n"
 		printf "# Inserito valore non corretto $option       \n"
@@ -177,6 +178,7 @@ if [ $option -le $optionNumbers -a $option -ge 0 ];
 		echo "`$timestamp`: inserito valore non corretto ->$option<-"
 	exit 11
 fi
+
 }
 
 
