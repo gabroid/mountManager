@@ -60,7 +60,7 @@ printf "\n\n\n"
 ((echo "`$timestamp`: Creo File - $fileLogName - in $DestLogPath" && echo "`$timestamp`: inizio script") || (exit 99 && echo "`$timestamp`: impossibile creare file di log!!"))2>&1 |tee -a $logfile
 
 # Verifico esistenza pacchetti neccessari:
-#pkgeExistence cifs-utils #removed, it isn't required
+pkgeExistence cifs-utils
 pkgeExistence smbclient
 
 #Mostro Menu:
